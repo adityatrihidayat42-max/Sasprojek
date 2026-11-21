@@ -16,6 +16,9 @@
     <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><span class="nav-icon">▦</span> Dashboard</a>
     <a href="{{ route('admin.orders') }}" class="{{ request()->routeIs('admin.orders*') ? 'active' : '' }}"><span class="nav-icon">▤</span> Pesanan</a>
     @if(in_array($role, ['admin','cashier']))
+      <a href="{{ route('admin.shifts') }}" class="{{ request()->routeIs('admin.shifts*') ? 'active' : '' }}"><span class="nav-icon">◷</span> Shift Kasir</a>
+    @endif
+    @if(in_array($role, ['admin','cashier']))
       <a href="{{ route('admin.orders.scan') }}" class="{{ request()->routeIs('admin.orders.scan*') ? 'active' : '' }}"><span class="nav-icon">▣</span> Scan QR Pesanan</a>
       <a href="{{ route('admin.reservations') }}" class="{{ request()->routeIs('admin.reservations*') ? 'active' : '' }}"><span class="nav-icon">▣</span> Reservasi</a>
     @endif
