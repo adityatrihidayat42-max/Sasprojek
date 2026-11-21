@@ -102,7 +102,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       <div class="eyebrow">— SHIFT KASIR —</div><h2 class="serif">Buka & Tutup Shift</h2>
       <div id="ops-shift"><div class="ops-empty">Memuat shift…</div></div>
       <div class="ops-head" style="margin-top:18px"><h3>Laporan Shift</h3><button class="btn sm light" id="ops-shift-refresh">Perbarui</button></div>
-      <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Kasir</th><th>Dibuka</th><th>Modal</th><th>Uang seharusnya</th><th>Uang fisik</th><th>Selisih</th><th>Status</th></tr></thead><tbody id="ops-shift-rows"><tr><td colspan="7">Memuat…</td></tr></tbody></table></div>
+      <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Kasir</th><th>Dibuka</th><th>Modal awal</th><th>Penjualan tunai</th><th>Non-tunai</th><th>Uang seharusnya</th><th>Uang fisik</th><th>Selisih</th><th>Status</th></tr></thead><tbody id="ops-shift-rows"><tr><td colspan="7">Memuat…</td></tr></tbody></table></div>
     </div>` : ''}
     ${profile.role === 'admin' ? `
     <div class="panel" id="ops-report">
@@ -163,7 +163,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
   async function loadShiftRows() {
     const { data, error } = await supabase.from('cashier_shifts').select('*').order('opened_at',{ascending:false}).limit(50);
     const body = section.querySelector('#ops-shift-rows');
-    if (error) { body.innerHTML = '<tr><td colspan="7">' + safe(error.message) + '</td></tr>'; return; }
+    if (error) { body.innerHTML = '<tr><td colspan="9">' + safe(error.message) + '</td></tr>'; return; }
     const rows = data || [];
     let names = {};
     if (profile.role === 'admin' && rows.length) {
@@ -171,7 +171,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       const p = await supabase.from('profiles').select('id,full_name').in('id',ids);
       (p.data || []).forEach(x=>names[x.id]=x.full_name || x.id.slice(0,8));
     }
-    body.innerHTML = rows.map(x => '<tr><td>' + safe(names[x.cashier_id] || (x.cashier_id===profile.id ? (profile.full_name || 'Saya') : x.cashier_id.slice(0,8))) + '</td><td>' + dateText(x.opened_at) + '</td><td>' + rupiah(x.opening_cash) + '</td><td>' + rupiah(x.expected_cash) + '</td><td>' + rupiah(x.closing_cash) + '</td><td>' + rupiah(x.cash_difference) + '</td><td>' + safe(x.status) + '</td></tr>').join('') || '<tr><td colspan="7">Belum ada laporan shift.</td></tr>';
+    body.innerHTML = rows.map(x => '<tr><td>' + safe(names[x.cashier_id] || (x.cashier_id===profile.id ? (profile.full_name || 'Saya') : x.cashier_id.slice(0,8))) + '</td><td>' + dateText(x.opened_at) + '</td><td>' + rupiah(x.opening_cash) + '</td><td>' + rupiah(x.cash_sales) + '</td><td>' + rupiah(x.non_cash_sales) + '</td><td>' + rupiah(x.expected_cash) + '</td><td>' + rupiah(x.closing_cash) + '</td><td>' + rupiah(x.cash_difference) + '</td><td>' + safe(x.status) + '</td></tr>').join('') || '<tr><td colspan="9">Belum ada laporan shift.</td></tr>';
   }
 
   async function loadReport(from, to) {
