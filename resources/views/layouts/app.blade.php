@@ -39,17 +39,43 @@
   </div>
   @yield('content')
 </main>
-<footer>
-  <div class="container foot">
-    <div><img src="{{ asset('images/arana-space-logo.svg') }}" alt="Arana Space" style="width:190px;background:#f8eddd;border-radius:12px;padding:8px">
-      <p style="margin-top:10px">Good Food, Good Mood.</p></div>
-    <div><h4>Quick Links</h4>
-      <a href="{{ route('home') }}">Home</a><a href="{{ route('menu') }}">Menu</a><a href="{{ route('promotions') }}">Promo</a>
-      <a href="{{ route('scan') }}">Scan Meja</a><a href="{{ route('reservation') }}">Reservasi</a></div>
-    <div><h4>Contact Us</h4><p>📞 +62 812 3456 7890</p><p>📍 Indonesia</p><p>✉️ hello@aranaspace.id</p></div>
-    <div><h4>Follow Us</h4><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">YouTube</a></div>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <section class="footer-brand">
+      <a href="{{ route('home') }}" class="footer-logo"><img src="{{ asset('images/arana-space-logo.svg') }}" alt="Arana Space"></a>
+      <p class="footer-tagline">Good Food, Good Mood.</p>
+      <p class="footer-description">Tempat menikmati kopi, hidangan lezat, dan momen santai dalam suasana yang hangat.</p>
+    </section>
+    <nav class="footer-column" aria-label="Navigasi">
+      <h4>Jelajahi</h4>
+      <a href="{{ route('home') }}">Home</a>
+      <a href="{{ route('menu') }}">Menu</a>
+      <a href="{{ route('promotions') }}">Promo</a>
+      <a href="{{ route('scan') }}">Scan Meja</a>
+      <a href="{{ route('reservation') }}">Reservasi</a>
+    </nav>
+    <section class="footer-column">
+      <h4>Hubungi Kami</h4>
+      <p><span class="footer-symbol">☎</span><span>+62 812 3456 7890</span></p>
+      <p><span class="footer-symbol">⌖</span><span>Indonesia</span></p>
+      <p><span class="footer-symbol">✉</span><a href="mailto:hello@aranaspace.id">hello@aranaspace.id</a></p>
+    </section>
+    <section class="footer-column">
+      <h4>Ikuti Kami</h4>
+      <p class="footer-social-note">Ikuti kabar terbaru, menu spesial, dan promo Arana Space.</p>
+      <div class="footer-socials">
+        <a href="#" aria-label="Instagram">Instagram <span>↗</span></a>
+        <a href="#" aria-label="TikTok">TikTok <span>↗</span></a>
+        <a href="#" aria-label="YouTube">YouTube <span>↗</span></a>
+      </div>
+    </section>
   </div>
-  <div class="copy">© {{ date('Y') }} Arana Space. All Rights Reserved.</div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <span>© {{ date('Y') }} Arana Space. All rights reserved.</span>
+      <span>Made for good moments <b>✦</b></span>
+    </div>
+  </div>
 </footer>
 </body>
 </html>
