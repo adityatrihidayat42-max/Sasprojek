@@ -16,6 +16,14 @@ class PromotionController extends Controller
     {
         abort_unless($promotion->is_active, 404);
         $promotion->load('product');
-        return view('promotions.show', ['promo' => $promotion]);
+
+        $others = Promotion::active()
+            ->with('product')
+            ->whereKeyNot($promotion->id)
+            ->orderBy('ends_at')
+            ->take(3)
+            ->get();
+
+        return view('promotions.show', ['promo' => $promotion, 'others' => $others]);
     }
 }

@@ -55,16 +55,17 @@
 
 <section>
   <div class="container two">
-    <div class="promo" style="--promo-photo:url('https://images.unsplash.com/photo-1769138886199-7cc55bf86da5?auto=format&fit=crop&w=1400&q=85');color:#fff">
+    <div class="promo" style="--promo-photo:url('{{ $promo?->photoUrl() ?? \App\Models\Promotion::defaultPhoto() }}')">
       @if($promo)
-        <span class="tagp">PROMO SPESIAL</span>
+        <span class="tagp">✦ Promo Spesial</span>
         <div class="big serif">{{ $promo->label() }}</div>
         <b style="font-size:1.4rem">untuk {{ $promo->product->name ?? 'Menu Pilihan' }}!</b>
         <span>Berlaku sampai {{ $promo->ends_at->translatedFormat('d F Y') }}</span>
-        <div><a class="btn" href="{{ route('promotions') }}">Lihat Promo →</a></div>
+        <div><a class="btn" href="{{ route('promotions.show', $promo->slug) }}">Lihat Promo →</a></div>
       @else
-        <span class="tagp">PROMO</span>
+        <span class="tagp">Promo</span>
         <div class="big serif">Nantikan promo terbaru!</div>
+        <span>Selalu ada kejutan menu spesial untukmu.</span>
         <div><a class="btn" href="{{ route('promotions') }}">Lihat Promo →</a></div>
       @endif
     </div>

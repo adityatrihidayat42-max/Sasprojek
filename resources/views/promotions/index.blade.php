@@ -1,19 +1,24 @@
 @extends('layouts.app')
-@section('title', 'Promo - BrewNest')
+@section('title', 'Promo - Arana Space')
 @section('content')
 <section class="section"><div class="container">
-  <h1 class="serif" style="margin-bottom:14px">Promo BrewNest</h1>
+  <div class="promo-head">
+    <div class="eyebrow">— Promo Spesial —</div>
+    <h1 class="serif">Promo Arana Space</h1>
+    <p>Nikmati kopi dan hidangan favorit dengan harga lebih hemat. Pilih promo yang sedang berlaku, diskon otomatis saat checkout.</p>
+  </div>
+
   @if($promos->isEmpty())
-    <p class="muted">Belum ada promo aktif. Nantikan penawaran terbaru!</p>
+    <div class="promo-empty">
+      <div class="empty-icon" aria-hidden="true">✦</div>
+      <h2 class="serif">Belum ada promo aktif</h2>
+      <p>Nantikan penawaran terbaru dari Arana Space. Sambil menunggu, jelajahi menu favorit kami dulu, ya.</p>
+      <a class="btn" href="{{ route('menu') }}">Lihat Menu <span aria-hidden="true">→</span></a>
+    </div>
   @else
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+    <div class="promo-grid">
       @foreach($promos as $p)
-        <a class="promo" href="{{ route('promotions.show', $p->slug) }}">
-          <span class="tagp">PROMO</span>
-          <div class="big serif">{{ $p->label() }}</div>
-          <b>{{ $p->name }}</b>
-          <span class="small">Sampai {{ $p->ends_at->translatedFormat('d F Y') }}</span>
-        </a>
+        @include('partials.promo-card', ['p' => $p])
       @endforeach
     </div>
   @endif

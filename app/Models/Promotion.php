@@ -37,4 +37,17 @@ class Promotion extends Model
         $v = floor($v) == $v ? (int) $v : $v;
         return $this->discount_type === 'percentage' ? "Diskon {$v}%" : 'Potongan ' . rp($v);
     }
+
+    /**
+     * Foto promo: pakai foto produk jika ada, jika tidak foto kopi default.
+     */
+    public function photoUrl(): string
+    {
+        return $this->product?->imageUrl() ?: self::defaultPhoto();
+    }
+
+    public static function defaultPhoto(): string
+    {
+        return 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1400&q=85';
+    }
 }
