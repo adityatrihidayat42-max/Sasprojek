@@ -1,3 +1,5 @@
+import * as XLSX from 'xlsx';
+
 const STATUS = {
   pending: 'Pesanan masuk',
   confirmed: 'Dikonfirmasi',
@@ -110,7 +112,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       <form id="ops-report-form" class="ops-form">
         <div class="form-group"><label>Dari tanggal</label><input type="date" name="from" required></div>
         <div class="form-group"><label>Sampai tanggal</label><input type="date" name="to" required></div>
-        <button class="btn">Tampilkan</button><button type="button" class="btn light" id="ops-csv">Unduh Excel (CSV)</button><button type="button" class="btn light" id="ops-pdf">Cetak / Simpan PDF</button>
+        <button class="btn">Tampilkan</button><button type="button" class="btn light" id="ops-xlsx">Unduh Excel (.xlsx)</button><button type="button" class="btn light" id="ops-csv">Unduh CSV</button><button type="button" class="btn light" id="ops-pdf">Cetak / Simpan PDF</button>
       </form>
       <div id="ops-report-content" style="margin-top:14px"><div class="ops-empty">Pilih periode laporan.</div></div>
     </div>` : ''}
@@ -129,7 +131,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       .order('created_at', { ascending: false }).limit(80);
     if (error) { orderHost.innerHTML = '<div class="ops-empty">Gagal memuat pesanan: ' + safe(error.message) + '</div>'; return; }
     ordersCache = data || [];
-    const shown = isKitchen ? ordersCache.filter(o => ['pending','confirmed','preparing','ready'].includes(o.order_status)) : ordersCache;
+    const shown = isKitchen ? ordersCache.filter(o => o.payment_status === 'paid' && ['pending','confirmed','preparing'].includes(o.order_status)) : ordersCache;
     if (!shown.length) { orderHost.innerHTML = '<div class="ops-empty">Belum ada pesanan.</div>'; return; }
     orderHost.innerHTML = shown.map(o => {
       const items = (o.order_items || []).map(i => '<div class="ops-item"><span>' + Number(i.quantity) + '× ' + safe(i.product_name) + (i.note ? ' <small>('+safe(i.note)+')</small>' : '') + '</span><b>' + rupiah(i.line_total) + '</b></div>').join('');
@@ -137,7 +139,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       const payment = o.payment_method ? o.payment_method.toUpperCase() + ' · ' + o.payment_status : 'Belum dipilih';
       let actions = '';
       if (isKitchen) {
-        if (o.order_status === 'pending' || o.order_status === 'confirmed') actions = '<button class="btn sm" data-kitchen-start="' + o.id + '">Mulai dibuat</button>';
+        if (o.payment_status === 'paid' && (o.order_status === 'pending' || o.order_status === 'confirmed')) actions = '<button class="btn sm" data-kitchen-start="' + o.id + '">Mulai dibuat</button>';
         if (o.order_status === 'preparing') actions = '<button class="btn sm" data-kitchen-ready="' + o.id + '">Siap Disajikan</button>';
       } else {
         if (canCashier && o.payment_method === 'cash' && o.payment_status !== 'paid' && o.order_status !== 'cancelled') actions += '<button class="btn sm" data-cash-confirm="' + o.id + '">Konfirmasi Tunai</button>';
@@ -182,7 +184,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       .order('created_at',{ascending:false});
     if (error) { area.innerHTML = '<div class="ops-empty">Gagal memuat laporan: ' + safe(error.message) + '</div>'; return; }
     reportRows = data || [];
-    const paid = reportRows.filter(x=>x.payment_status==='paid');
+    const paid = reportRows.filter(x=>x.payment_status==='paid' && x.order_status!=='cancelled');
     const revenue = paid.reduce((sum,x)=>sum+Number(x.grand_total||0),0);
     const discounts = paid.reduce((sum,x)=>sum+Number(x.discount_total||0),0);
     const cash = paid.filter(x=>x.payment_method==='cash').reduce((sum,x)=>sum+Number(x.grand_total||0),0);
@@ -219,6 +221,20 @@ export function mountAdminOperations({ supabase, profile, toast }) {
         const {error} = await supabase.from('orders').update({order_status:'cancelled'}).eq('id',Number(target.dataset.orderCancel));
         if (error) throw error;
         toast('Pesanan dibatalkan.'); await loadOrders();
+      } else if (target.id === 'ops-xlsx') {
+        const summary = [['LAPORAN PENJUALAN ARANA SPACE'],['Periode', section.querySelector('[name="from"]').value, 's.d.', section.querySelector('[name="to"]').value],[],['Nomor','Waktu','Jenis','Metode','Status pembayaran','Subtotal','Diskon','Total','Status pesanan']];
+        reportRows.forEach(o=>summary.push([o.order_number,o.created_at,o.order_type,o.payment_method||'',o.payment_status,Number(o.subtotal||0),Number(o.discount_total||0),Number(o.grand_total||0),o.order_status]));
+        const paidRows = reportRows.filter(o=>o.payment_status==='paid' && o.order_status!=='cancelled');
+        const sold = {};
+        paidRows.forEach(o=>(o.order_items||[]).forEach(i=>{sold[i.product_name]=(sold[i.product_name]||0)+Number(i.quantity||0)}));
+        const menu = [['Menu','Jumlah terjual'],...Object.entries(sold)];
+        const summarySheet = XLSX.utils.aoa_to_sheet(summary);
+        const menuSheet = XLSX.utils.aoa_to_sheet(menu);
+        summarySheet['!cols'] = [{wch:22},{wch:22},{wch:14},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18}];
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Transaksi');
+        XLSX.utils.book_append_sheet(workbook, menuSheet, 'Menu Terjual');
+        XLSX.writeFile(workbook, 'laporan-arana-space.xlsx');
       } else if (target.id === 'ops-csv') {
         const rows = [['Nomor','Waktu','Jenis','Metode','Status pembayaran','Subtotal','Diskon','Total','Status pesanan']];
         reportRows.forEach(o=>rows.push([o.order_number,o.created_at,o.order_type,o.payment_method||'',o.payment_status,o.subtotal,o.discount_total,o.grand_total,o.order_status]));
@@ -271,7 +287,8 @@ export function mountAdminOperations({ supabase, profile, toast }) {
   if (canCashier) { loadShift(); loadShiftRows(); }
 
   liveChannel = supabase.channel('arana-ops-' + profile.id)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{
+     .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{
+      if (isKitchen && payload.new?.payment_status !== 'paid') return;
       if (soundOn) playChime();
       toast('Pesanan baru masuk: ' + (payload.new?.order_number || ''));
       loadOrders();
@@ -283,29 +300,3 @@ export function mountAdminOperations({ supabase, profile, toast }) {
     });
 }
 
-export function mountOrderTracking({ supabase, orderNumber, toast }) {
-  styles();
-  if (trackTimer) { clearInterval(trackTimer); trackTimer = null; }
-  const form = document.querySelector('#customer-track-form');
-  const result = document.querySelector('#customer-track-result');
-  if (!form || !result) return;
-  let phone = '';
-  let lastStatus = null;
-  async function lookup() {
-    const {data,error} = await supabase.rpc('lookup_customer_order',{p_order_number:orderNumber,p_customer_phone:phone});
-    if (error) { result.innerHTML='<div class="ops-empty">'+safe(error.message)+'</div>'; return false; }
-    if (lastStatus && lastStatus !== data.order_status) toast('Status pesanan berubah: '+(STATUS[data.order_status]||data.order_status));
-    lastStatus = data.order_status;
-    const states = ['pending','preparing','completed'];
-    const active = data.order_status === 'cancelled' ? -1 : states.indexOf(data.order_status);
-    const steps = states.map((s,i)=>'<div class="track-step '+(active>=i?'done':'')+'">'+(i===0?'Pesanan masuk':i===1?'Sedang dibuat':'Selesai')+'</div>').join('');
-    result.innerHTML = '<div class="panel"><div class="ops-head"><h2 class="serif">'+safe(STATUS[data.order_status]||data.order_status)+'</h2><span class="ops-pill">'+safe(data.payment_status)+'</span></div><div class="track-steps">'+steps+'</div><p><b>Jenis pesanan:</b> '+(data.order_type==='dine_in'?'Dine-in':'Takeaway')+'</p><p><b>Metode pembayaran:</b> '+safe((data.payment_method||'-').toUpperCase())+'</p>'+(data.payment_method==='qris'&&data.payment_status!=='paid'?'<div class="ops-note">Pembayaran QRIS masih menunggu verifikasi. Integrasi penyedia QRIS perlu diaktifkan agar konfirmasi berlangsung otomatis.</div>':'')+'<div class="ops-items">'+(data.items||[]).map(i=>'<div class="ops-item"><span>'+Number(i.quantity)+'× '+safe(i.product_name)+'</span><b>'+rupiah(i.line_total)+'</b></div>').join('')+'</div><div class="sum-line total"><b>Total</b><b>'+rupiah(data.grand_total)+'</b></div><p class="ops-muted">Terakhir diperbarui: '+dateText(data.ready_at||data.created_at)+'</p></div>'; return true;
-  }
-  form.addEventListener('submit',async e=>{
-    e.preventDefault();
-    phone = String(new FormData(form).get('customer_phone')||'').trim();
-    if (!phone) return;
-    const ok = await lookup();
-    if (ok && !trackTimer) trackTimer = setInterval(lookup,15000);
-  });
-}
