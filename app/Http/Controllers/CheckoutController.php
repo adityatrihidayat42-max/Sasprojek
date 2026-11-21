@@ -1,12 +1,12 @@
 <?php
 
-namespace App\\Http\\Controllers;
+namespace App\Http\Controllers;
 
-use App\\Models\\Order;
-use App\\Support\\Cart;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Str;
+use App\Models\Order;
+use App\Support\Cart;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
@@ -28,7 +28,7 @@ class CheckoutController extends Controller
         $table = Cart::table();
         $data = $r->validate([
             'customer_name' => 'required|string|max:80',
-            'customer_phone' => [$table ? 'nullable' : 'required', 'string', 'regex:/^[0-9+\\-\\s]{8,20}$/'],
+            'customer_phone' => [$table ? 'nullable' : 'required', 'string', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'pickup_at' => 'nullable|date|after:now',
             'customer_note' => 'nullable|string|max:500',
             'payment_method' => 'required|in:cash,qris',
