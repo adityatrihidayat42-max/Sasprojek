@@ -24,22 +24,22 @@ class DatabaseSeeder extends Seeder
         $food = Category::create(['name' => 'Makanan Ringan', 'description' => 'Cake dan camilan']);
 
         $items = [
-            [$kopi, 'Cappuccino', 'Espresso dengan susu steamed yang lembut.', 28000, true],
-            [$kopi, 'Iced Latte', 'Espresso dingin dengan susu segar.', 30000, false],
-            [$non, 'Matcha Latte', 'Perpaduan matcha premium dan susu.', 32000, false],
-            [$food, 'Strawberry Cheesecake', 'Kelezatan cheesecake dengan saus stroberi.', 35000, false],
-            [$kopi, 'Espresso', 'Single shot espresso pekat.', 20000, false],
-            [$kopi, 'Americano', 'Espresso dengan air panas.', 22000, false],
-            [$kopi, 'Caramel Macchiato', 'Espresso, susu, dan saus karamel.', 34000, false],
-            [$non, 'Lemon Tea', 'Teh segar dengan perasan lemon.', 20000, false],
-            [$food, 'Chocolate Cake', 'Cake cokelat lembut dengan ganache.', 33000, false],
-            [$food, 'Croissant Butter', 'Croissant renyah berbahan butter.', 25000, false],
-            [$food, 'French Fries', 'Kentang goreng renyah.', 22000, false],
+            [$kopi, 'Cappuccino', 'Espresso dengan susu steamed yang lembut.', 28000, true, 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=85'],
+            [$kopi, 'Iced Latte', 'Espresso dingin dengan susu segar.', 30000, false, 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=900&q=85'],
+            [$non, 'Matcha Latte', 'Perpaduan matcha premium dan susu.', 32000, false, 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=900&q=85'],
+            [$food, 'Strawberry Cheesecake', 'Kelezatan cheesecake dengan saus stroberi.', 35000, false, 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=900&q=85'],
+            [$kopi, 'Espresso', 'Single shot espresso pekat.', 20000, false, 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=85'],
+            [$kopi, 'Americano', 'Espresso dengan air panas.', 22000, false, 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=85'],
+            [$kopi, 'Caramel Macchiato', 'Espresso, susu, dan saus karamel.', 34000, false, 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=900&q=85'],
+            [$non, 'Lemon Tea', 'Teh segar dengan perasan lemon.', 20000, false, 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=900&q=85'],
+            [$food, 'Chocolate Cake', 'Cake cokelat lembut dengan ganache.', 33000, false, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=85'],
+            [$food, 'Croissant Butter', 'Croissant renyah berbahan butter.', 25000, false, 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=85'],
+            [$food, 'French Fries', 'Kentang goreng renyah.', 22000, false, 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=900&q=85'],
         ];
-        foreach ($items as [$cat, $name, $desc, $price, $best]) {
+        foreach ($items as [$cat, $name, $desc, $price, $best, $image]) {
             Product::create([
                 'category_id' => $cat->id, 'name' => $name, 'slug' => Slug::make(Product::class, $name),
-                'description' => $desc, 'price' => $price, 'is_best_seller' => $best,
+                'description' => $desc, 'image' => $image, 'price' => $price, 'is_best_seller' => $best,
             ]);
         }
 
