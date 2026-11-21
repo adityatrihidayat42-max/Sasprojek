@@ -121,6 +121,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
   let soundOn = false;
   let reportRows = [];
   let currentShift = null;
+  const notifiedKitchenOrders = new Set();
   const orderHost = section.querySelector('#ops-orders');
 
   async function loadOrders() {
@@ -129,6 +130,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       .order('created_at', { ascending: false }).limit(80);
     if (error) { orderHost.innerHTML = '<div class="ops-empty">Gagal memuat pesanan: ' + safe(error.message) + '</div>'; return; }
     ordersCache = data || [];
+    if (isKitchen) ordersCache.filter(o => o.payment_status === 'paid' && ['pending','confirmed','preparing'].includes(o.order_status)).forEach(o => notifiedKitchenOrders.add(String(o.id)));
     const shown = isKitchen ? ordersCache.filter(o => o.payment_status === 'paid' && ['pending','confirmed','preparing'].includes(o.order_status)) : ordersCache;
     if (!shown.length) { orderHost.innerHTML = '<div class="ops-empty">Belum ada pesanan.</div>'; return; }
     orderHost.innerHTML = shown.map(o => {
@@ -288,11 +290,20 @@ export function mountAdminOperations({ supabase, profile, toast }) {
   liveChannel = supabase.channel('arana-ops-' + profile.id)
      .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{
       if (isKitchen && payload.new?.payment_status !== 'paid') return;
+      if (isKitchen) notifiedKitchenOrders.add(String(payload.new?.id));
       if (soundOn) playChime();
       toast('Pesanan baru masuk: ' + (payload.new?.order_number || ''));
       loadOrders();
     })
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},()=>loadOrders())
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},payload=>{
+      const order = payload.new || {};
+      if (isKitchen && order.payment_status === 'paid' && ['pending','confirmed'].includes(order.order_status) && !notifiedKitchenOrders.has(String(order.id))) {
+        notifiedKitchenOrders.add(String(order.id));
+        if (soundOn) playChime();
+        toast('Pembayaran diterima. Pesanan masuk antrean dapur: ' + (order.order_number || ''));
+      }
+      loadOrders();
+    })
     .subscribe(status=>{
       const el = section.querySelector('#ops-connection');
       if (el) el.textContent = status === 'SUBSCRIBED' ? '● Terhubung · Notifikasi real-time aktif' : 'Menghubungkan ulang notifikasi…';
