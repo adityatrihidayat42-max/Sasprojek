@@ -1,12 +1,12 @@
 <?php
 
-namespace App\\Http\\Controllers\\Admin;
+namespace App\Http\Controllers\Admin;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Models\\CashierShift;
-use App\\Models\\Order;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\DB;
+use App\Http\Controllers\Controller;
+use App\Models\CashierShift;
+use App\Models\Order;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShiftController extends Controller
 {
@@ -40,10 +40,9 @@ class ShiftController extends Controller
     {
         abort_unless(in_array($request->user()->role, ['admin', 'cashier']), 403);
         $data = $request->validate(['closing_cash' => ['required', 'numeric', 'min:0', 'max:999999999']]);
-        $shift = CashierShift::where('cashier_id', $request->user()->id)->where('status', 'open')->lockForUpdate()->first();
-        if (!$shift) return back()->withErrors(['shift' => 'Tidak ada shift aktif.']);
-
-        DB::transaction(function () use ($shift, $data, $request) {
+        DB::transaction(function () use ($data, $request) {
+            $shift = CashierShift::where('cashier_id', $request->user()->id)->where('status', 'open')->lockForUpdate()->first();
+            if (!$shift) abort(422, 'Tidak ada shift aktif.');
             $orders = Order::where('payment_status', 'paid')
                 ->where('paid_by', $request->user()->id)
                 ->whereBetween('paid_at', [$shift->opened_at, now()])
