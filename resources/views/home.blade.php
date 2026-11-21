@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<section class="hero" style="background:#4b2818 url('{{ asset('images/arana-space-hero.svg') }}') center/cover no-repeat">
+<section class="hero" style="--hero-photo:url('https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=2000&q=85')">
   <div class="container hero-grid">
     <div>
       <div class="eyebrow">— Good Food, Good Mood —</div>
@@ -40,7 +40,7 @@
 
 <section>
   <div class="container two">
-    <div class="promo" style="background:#f3dfc5 url('{{ asset('images/arana-space-promo.svg') }}') center/cover no-repeat;color:#4b2818">
+    <div class="promo" style="--promo-photo:url('https://images.unsplash.com/photo-1769138886199-7cc55bf86da5?auto=format&fit=crop&w=1400&q=85');color:#fff">
       @if($promo)
         <span class="tagp">PROMO SPESIAL</span>
         <div class="big serif">{{ $promo->label() }}</div>
