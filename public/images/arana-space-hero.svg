@@ -1,1 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#32190f"/><stop offset="1" stop-color="#9b6036"/></linearGradient><radialGradient id="r"><stop stop-color="#f1c895"/><stop offset="1" stop-color="#9c633a"/></radialGradient></defs><rect width="1200" height="520" rx="32" fill="url(#g)"/><circle cx="900" cy="270" r="210" fill="#d7a36e" opacity=".18"/><ellipse cx="900" cy="386" rx="205" ry="38" fill="#21120d" opacity=".5"/><path d="M765 160h260l-30 205q-100 68-200 0Z" fill="#f2e1cb"/><path d="M780 184h230l-14 82H794Z" fill="#a45f36"/><ellipse cx="895" cy="181" rx="115" ry="34" fill="#fff0dc"/><ellipse cx="895" cy="182" rx="95" ry="24" fill="#754125"/><path d="M880 175c-40-24 15-47 0-78M915 174c-40-24 15-47 0-78" stroke="#f4d7b2" stroke-width="9" fill="none" stroke-linecap="round"/><text x="70" y="155" fill="#f8e9d7" font-family="Georgia,serif" font-size="64" font-weight="bold">Arana Space</text><text x="70" y="235" fill="#fff" font-family="Arial,sans-serif" font-size="52" font-weight="bold">Good Food, Good Mood.</text><text x="72" y="292" fill="#f4ddc2" font-family="Arial,sans-serif" font-size="25">Temukan kopi favorit dan ruang nyaman untuk jeda.</text><rect x="70" y="345" width="210" height="58" rx="29" fill="#f1d3ad"/><text x="175" y="382" fill="#4b2818" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Jelajahi Menu</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-label="Ilustrasi secangkir kopi Arana Space">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4b2818"/>
+      <stop offset="1" stop-color="#8a5230"/>
+    </linearGradient>
+    <linearGradient id="cup" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff0dc"/>
+      <stop offset="1" stop-color="#e8c9a4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <circle cx="930" cy="255" r="220" fill="#e7b982" opacity=".14"/>
+  <ellipse cx="920" cy="420" rx="220" ry="35" fill="#21120d" opacity=".35"/>
+  <path d="M785 165h270l-32 220q-103 70-206 0z" fill="url(#cup)"/>
+  <path d="M805 190h230l-17 92H822z" fill="#a45f36"/>
+  <ellipse cx="920" cy="190" rx="115" ry="37" fill="#fff0dc"/>
+  <ellipse cx="920" cy="190" rx="94" ry="26" fill="#754125"/>
+  <path d="M900 170c-38-30 18-55 0-91M940 170c-38-30 18-55 0-91" stroke="#f4d7b2" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M1055 215c80-12 83 98 3 106" fill="none" stroke="#e8c9a4" stroke-width="24" stroke-linecap="round"/>
+  <path d="M1055 231c48-7 50 67 2 75" fill="none" stroke="#8a5230" stroke-width="12" stroke-linecap="round"/>
+</svg>
