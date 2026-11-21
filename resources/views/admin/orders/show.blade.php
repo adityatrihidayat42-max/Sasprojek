@@ -13,7 +13,7 @@
       @if($order->customer_note)<p style="margin-top:8px">📝 {{ $order->customer_note }}</p>@endif
     </div>
     <div class="panel">
-      <h3 class="serif" style="margin-bottom:8px">Item</h3>
+      <h3 class="serif" style="margin-bottom:8px">Item Pesanan</h3>
       @foreach($order->items as $it)
         <div class="sum-line"><span><b>{{ $it->quantity }}×</b> {{ $it->product_name }}@if($it->note) <i class="muted small">({{ $it->note }})</i>@endif</span><span>{{ rp($it->line_total) }}</span></div>
       @endforeach
@@ -23,28 +23,42 @@
     </div>
   </div>
   <div>
-    <form class="panel" method="POST" action="{{ route('admin.orders.status', $order) }}">@csrf @method('PATCH')
-      <label>Status pengerjaan</label>
-      <div class="row"><select name="order_status" style="flex:1">
-        @foreach($statusOptions as $k => $v)<option value="{{ $k }}" @selected($order->order_status === $k)>{{ $v }}</option>@endforeach</select>
-        <button class="btn sm">Simpan</button></div>
+    @if(count($statusOptions))
+    <form class="panel" method="POST" action="{{ route('admin.orders.status', $order) }}">
+      @csrf @method('PATCH')
+      <label>{{ auth()->user()->role === 'kitchen' ? 'Proses dapur' : 'Tindakan pesanan' }}</label>
+      <div class="row">
+        <select name="order_status" style="flex:1" required>
+          @foreach($statusOptions as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach
+        </select>
+        <button class="btn sm">{{ auth()->user()->role === 'kitchen' ? 'Perbarui' : 'Simpan' }}</button>
+      </div>
+      @if(auth()->user()->role === 'kitchen')
+        <p class="muted small" style="margin-top:8px">Saat tombol Siap Disajikan ditekan, pesanan ditandai selesai. Staf kemudian mengantarkan pesanan ke meja atau menyerahkannya kepada pelanggan takeaway.</p>
+      @endif
     </form>
-    @if(in_array(auth()->user()->role, ['admin','cashier']))
-    <form class="panel" method="POST" action="{{ route('admin.orders.payment', $order) }}">@csrf @method('PATCH')
-      <label>Status pembayaran</label>
-      <div class="row"><select name="payment_status" style="flex:1">
-        @foreach(\App\Models\Order::PAYMENTS as $k => $v)<option value="{{ $k }}" @selected($order->payment_status === $k)>{{ $v }}</option>@endforeach</select>
-        <button class="btn sm">Simpan</button></div>
+    @endif
+    @if(in_array(auth()->user()->role, ['admin','cashier']) && ($order->payment_method ?? 'cash') === 'cash' && $order->payment_status !== 'paid' && $order->order_status !== 'cancelled')
+    <form class="panel" method="POST" action="{{ route('admin.orders.payment', $order) }}">
+      @csrf @method('PATCH')
+      <h3 class="serif">Konfirmasi pembayaran tunai</h3>
+      <p class="muted small">Pastikan uang sudah diterima. Setelah dikonfirmasi, pesanan otomatis masuk antrean dapur.</p>
+      <input type="hidden" name="payment_status" value="paid">
+      <button class="btn sm" style="margin-top:10px">Konfirmasi sudah dibayar</button>
     </form>
+    @elseif(($order->payment_method ?? 'cash') === 'qris')
+      <div class="panel"><b>Pembayaran QRIS</b><p class="muted small">Status: {{ $order->paymentLabel() }}. Pembayaran QRIS harus diverifikasi oleh payment gateway; kasir tidak dapat mengubahnya secara manual.</p></div>
     @endif
     <div class="panel">
       <h3 class="serif" style="margin-bottom:8px">Riwayat</h3>
-      @foreach($order->histories->sortByDesc('id') as $h)
+      @forelse($order->histories->sortByDesc('id') as $h)
         <p class="small">{{ $h->created_at->format('d/m H:i') }} ·
-          {{ $h->type === 'payment' ? 'Bayar' : 'Status' }}:
+          {{ $h->type === 'payment' ? 'Pembayaran' : 'Status' }}:
           {{ $h->type === 'payment' ? (\App\Models\Order::PAYMENTS[$h->new_value] ?? $h->new_value) : (\App\Models\Order::STATUSES[$h->new_value] ?? $h->new_value) }}
           <span class="muted">({{ $h->user->name ?? 'Pelanggan' }})</span></p>
-      @endforeach
+      @empty
+        <p class="muted small">Belum ada riwayat perubahan.</p>
+      @endforelse
     </div>
     <a class="btn light" href="{{ route('admin.orders') }}">← Kembali</a>
   </div>
