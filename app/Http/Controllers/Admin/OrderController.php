@@ -114,7 +114,7 @@ class OrderController extends Controller
                 'old_value' => $order->payment_status,
                 'new_value' => $next,
             ]);
-            $order->update(['payment_status' => $next]);
+            $order->update(['payment_status' => $next, 'paid_at' => $next === 'paid' ? now() : null, 'paid_by' => $next === 'paid' ? $r->user()->id : null]);
         }
         return back()->with('success', $next === 'paid' ? 'Pembayaran tunai dikonfirmasi. Pesanan masuk antrean dapur.' : 'Status pembayaran diperbarui.');
     }
