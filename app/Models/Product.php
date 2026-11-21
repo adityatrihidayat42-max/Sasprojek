@@ -21,7 +21,13 @@ class Product extends Model
 
     public function imageUrl(): ?string
     {
-        return $this->image ? asset($this->image) : null;
+        if (!$this->image) {
+            return null;
+        }
+
+        return filter_var($this->image, FILTER_VALIDATE_URL)
+            ? $this->image
+            : asset($this->image);
     }
 
     public function emoji(): string
