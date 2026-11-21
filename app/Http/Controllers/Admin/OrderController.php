@@ -12,18 +12,10 @@ class OrderController extends Controller
     public function index(Request $r)
     {
         $q = Order::with('cafeTable')->latest();
-        if ($r->filled('status')) {
-            $q->where('order_status', $r->input('status'));
-        }
-        if ($r->filled('payment')) {
-            $q->where('payment_status', $r->input('payment'));
-        }
-        if ($r->filled('type')) {
-            $q->where('order_type', $r->input('type'));
-        }
-        if ($r->filled('date')) {
-            $q->whereDate('created_at', $r->input('date'));
-        }
+        if ($r->filled('status')) $q->where('order_status', $r->input('status'));
+        if ($r->filled('payment')) $q->where('payment_status', $r->input('payment'));
+        if ($r->filled('type')) $q->where('order_type', $r->input('type'));
+        if ($r->filled('date')) $q->whereDate('created_at', $r->input('date'));
         if ($r->filled('q')) {
             $s = $r->input('q');
             $q->where(fn ($x) => $x->where('order_number', 'like', "%{$s}%")->orWhere('customer_name', 'like', "%{$s}%"));
@@ -41,12 +33,41 @@ class OrderController extends Controller
         return view('admin.orders.show', compact('order', 'statusOptions'));
     }
 
+    public function scan()
+    {
+        return view('admin.orders.scan');
+    }
+
+    public function lookup(Request $request)
+    {
+        $data = $request->validate([
+            'order_number' => ['required', 'string', 'max:40'],
+        ]);
+
+        $order = Order::where('order_number', $data['order_number'])->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Nomor pesanan tidak ditemukan. Periksa QR atau coba pindai ulang.',
+            ], 404);
+        }
+
+        return response()->json([
+            'redirect_url' => route('admin.orders.show', $order),
+            'order' => [
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer_name,
+                'order_status' => $order->statusLabel(),
+                'payment_status' => $order->paymentLabel(),
+                'grand_total' => $order->grand_total,
+            ],
+        ]);
+    }
+
     public function updateStatus(Request $r, Order $order)
     {
         $d = $r->validate(['order_status' => ['required', Rule::in(array_keys(Order::STATUSES))]]);
-        if (auth()->user()->role === 'kitchen' && !in_array($d['order_status'], ['preparing', 'ready'], true)) {
-            abort(403);
-        }
+        if (auth()->user()->role === 'kitchen' && !in_array($d['order_status'], ['preparing', 'ready'], true)) abort(403);
         if ($d['order_status'] !== $order->order_status) {
             $order->histories()->create([
                 'user_id' => auth()->id(), 'type' => 'status',
