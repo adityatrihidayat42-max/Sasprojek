@@ -102,7 +102,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       <div class="eyebrow">— SHIFT KASIR —</div><h2 class="serif">Buka & Tutup Shift</h2>
       <div id="ops-shift"><div class="ops-empty">Memuat shift…</div></div>
       <div class="ops-head" style="margin-top:18px"><h3>Laporan Shift</h3><button class="btn sm light" id="ops-shift-refresh">Perbarui</button></div>
-      <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Kasir</th><th>Dibuka</th><th>Modal awal</th><th>Penjualan tunai</th><th>Non-tunai</th><th>Uang seharusnya</th><th>Uang fisik</th><th>Selisih</th><th>Status</th></tr></thead><tbody id="ops-shift-rows"><tr><td colspan="7">Memuat…</td></tr></tbody></table></div>
+      <div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Kasir</th><th>Dibuka</th><th>Modal awal</th><th>Penjualan tunai</th><th>Non-tunai</th><th>Uang seharusnya</th><th>Uang fisik</th><th>Selisih</th><th>Status</th></tr></thead><tbody id="ops-shift-rows"><tr><td colspan="9">Memuat…</td></tr></tbody></table></div>
     </div>` : ''}
     ${profile.role === 'admin' ? `
     <div class="panel" id="ops-report">
@@ -188,7 +188,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
     const cash = paid.filter(x=>x.payment_method==='cash').reduce((sum,x)=>sum+Number(x.grand_total||0),0);
     const qris = paid.filter(x=>x.payment_method==='qris').reduce((sum,x)=>sum+Number(x.grand_total||0),0);
     const sold = {};
-    reportRows.forEach(o=>(o.order_items||[]).forEach(i=>{sold[i.product_name]=(sold[i.product_name]||0)+Number(i.quantity||0)}));
+    reportRows.filter(o=>o.payment_status==='paid'&&o.order_status!=='cancelled').forEach(o=>(o.order_items||[]).forEach(i=>{sold[i.product_name]=(sold[i.product_name]||0)+Number(i.quantity||0)}));
     area.innerHTML = '<div class="ops-kpi"><div>Transaksi<b>'+reportRows.length+'</b></div><div>Omzet dibayar<b>'+rupiah(revenue)+'</b></div><div>Diskon transaksi lunas<b>'+rupiah(discounts)+'</b></div><div>Tunai / QRIS<b>'+rupiah(cash)+' / '+rupiah(qris)+'</b></div></div><h3>Rincian Transaksi</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Nomor</th><th>Waktu</th><th>Jenis</th><th>Pembayaran</th><th>Diskon</th><th>Total</th><th>Status</th></tr></thead><tbody>'+reportRows.map(o=>'<tr><td>'+safe(o.order_number)+'</td><td>'+dateText(o.created_at)+'</td><td>'+safe(o.order_type)+'</td><td>'+safe((o.payment_method||'-')+' / '+o.payment_status)+'</td><td>'+rupiah(o.discount_total)+'</td><td>'+rupiah(o.grand_total)+'</td><td>'+safe(STATUS[o.order_status]||o.order_status)+'</td></tr>').join('')+'</tbody></table></div><h3 style="margin-top:18px">Menu Terjual</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Menu</th><th>Jumlah</th></tr></thead><tbody>'+Object.entries(sold).map(([name,qty])=>'<tr><td>'+safe(name)+'</td><td>'+qty+'</td></tr>').join('')+'</tbody></table></div>';
   }
 
