@@ -178,7 +178,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
     const area = section.querySelector('#ops-report-content');
     area.innerHTML = '<div class="ops-empty">Memuat laporan…</div>';
     const { data, error } = await supabase.from('orders').select('id,order_number,order_type,order_status,payment_status,payment_method,subtotal,discount_total,grand_total,created_at,order_items(product_name,quantity)')
-      .gte('created_at', from + 'T00:00:00').lte('created_at', to + 'T23:59:59')
+      .gte('created_at', new Date(from + 'T00:00:00').toISOString()).lte('created_at', new Date(to + 'T23:59:59.999').toISOString())
       .order('created_at',{ascending:false});
     if (error) { area.innerHTML = '<div class="ops-empty">Gagal memuat laporan: ' + safe(error.message) + '</div>'; return; }
     reportRows = data || [];
@@ -293,19 +293,19 @@ export function mountOrderTracking({ supabase, orderNumber, toast }) {
   let lastStatus = null;
   async function lookup() {
     const {data,error} = await supabase.rpc('lookup_customer_order',{p_order_number:orderNumber,p_customer_phone:phone});
-    if (error) { result.innerHTML='<div class="ops-empty">'+safe(error.message)+'</div>'; return; }
+    if (error) { result.innerHTML='<div class="ops-empty">'+safe(error.message)+'</div>'; return false; }
     if (lastStatus && lastStatus !== data.order_status) toast('Status pesanan berubah: '+(STATUS[data.order_status]||data.order_status));
     lastStatus = data.order_status;
     const states = ['pending','preparing','completed'];
     const active = data.order_status === 'cancelled' ? -1 : states.indexOf(data.order_status);
     const steps = states.map((s,i)=>'<div class="track-step '+(active>=i?'done':'')+'">'+(i===0?'Pesanan masuk':i===1?'Sedang dibuat':'Selesai')+'</div>').join('');
-    result.innerHTML = '<div class="panel"><div class="ops-head"><h2 class="serif">'+safe(STATUS[data.order_status]||data.order_status)+'</h2><span class="ops-pill">'+safe(data.payment_status)+'</span></div><div class="track-steps">'+steps+'</div><p><b>Jenis pesanan:</b> '+(data.order_type==='dine_in'?'Dine-in':'Takeaway')+'</p><p><b>Metode pembayaran:</b> '+safe((data.payment_method||'-').toUpperCase())+'</p><div class="ops-items">'+(data.items||[]).map(i=>'<div class="ops-item"><span>'+Number(i.quantity)+'× '+safe(i.product_name)+'</span><b>'+rupiah(i.line_total)+'</b></div>').join('')+'</div><div class="sum-line total"><b>Total</b><b>'+rupiah(data.grand_total)+'</b></div><p class="ops-muted">Terakhir diperbarui: '+dateText(data.ready_at||data.created_at)+'</p></div>';
+    result.innerHTML = '<div class="panel"><div class="ops-head"><h2 class="serif">'+safe(STATUS[data.order_status]||data.order_status)+'</h2><span class="ops-pill">'+safe(data.payment_status)+'</span></div><div class="track-steps">'+steps+'</div><p><b>Jenis pesanan:</b> '+(data.order_type==='dine_in'?'Dine-in':'Takeaway')+'</p><p><b>Metode pembayaran:</b> '+safe((data.payment_method||'-').toUpperCase())+'</p>'+(data.payment_method==='qris'&&data.payment_status!=='paid'?'<div class="ops-note">Pembayaran QRIS masih menunggu verifikasi. Integrasi penyedia QRIS perlu diaktifkan agar konfirmasi berlangsung otomatis.</div>':'')+'<div class="ops-items">'+(data.items||[]).map(i=>'<div class="ops-item"><span>'+Number(i.quantity)+'× '+safe(i.product_name)+'</span><b>'+rupiah(i.line_total)+'</b></div>').join('')+'</div><div class="sum-line total"><b>Total</b><b>'+rupiah(data.grand_total)+'</b></div><p class="ops-muted">Terakhir diperbarui: '+dateText(data.ready_at||data.created_at)+'</p></div>'; return true;
   }
   form.addEventListener('submit',async e=>{
     e.preventDefault();
     phone = String(new FormData(form).get('customer_phone')||'').trim();
     if (!phone) return;
-    await lookup();
-    if (!trackTimer) trackTimer = setInterval(lookup,15000);
+    const ok = await lookup();
+    if (ok && !trackTimer) trackTimer = setInterval(lookup,15000);
   });
 }
