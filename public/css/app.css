@@ -40,13 +40,13 @@ input[type=checkbox]{width:auto;margin-right:6px}
 .panel{background:#fff;border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 2px 10px #0001}
 /* hero */
 .hero{background:radial-gradient(circle at 75% 40%,#5a3a26,#1c130f 65%);color:#fff;padding:64px 0 90px}
-.hero-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center}
+.hero-grid{display:grid;grid-template-columns:minmax(0,680px);gap:30px;align-items:center}
 .eyebrow{color:var(--brown2);letter-spacing:.2em;font-size:.78rem;text-transform:uppercase}
-.hero h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.1;margin:12px 0}
+.hero h1{max-width:680px;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.1;margin:12px 0}
 .hero p{max-width:480px;color:#e9dccd}
 .hero-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
 .hero-cup{font-size:clamp(7rem,18vw,12rem);text-align:center;filter:drop-shadow(0 20px 30px #000a)}
-@media(max-width:800px){.hero-grid{grid-template-columns:1fr}.hero-cup{order:-1;font-size:6rem}}
+@media(max-width:800px){.hero{padding:48px 0 82px}.hero-grid{grid-template-columns:1fr}.hero h1{font-size:clamp(2rem,9vw,3rem)}}
 .features{display:grid;grid-template-columns:repeat(5,1fr);background:var(--cream);border-radius:20px;margin-top:-48px;box-shadow:0 10px 30px #0003;position:relative;padding:18px}
 .feature{text-align:center;padding:8px 12px;border-right:1px solid #e3d3bf}
 .feature:last-child{border:0}.feature span{font-size:1.8rem}.feature b{display:block}.feature small{color:var(--muted)}
