@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use BaconQrCode\Renderer\Image\ImageRenderer;
+use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
