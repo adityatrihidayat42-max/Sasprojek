@@ -19,7 +19,7 @@
     <a class="btn light sm" href="{{ route('admin.orders') }}">Daftar Pesanan</a>
   </div>
   <div class="cashier-scan-card">
-    <video id="cashier-qr-video" class="cashier-video" playsinline muted></video>
+    <div id="cashier-qr-video" class="cashier-video"></div>
     <div id="cashier-qr-status" class="cashier-scan-status" role="status" aria-live="polite">Menyiapkan pemindai QR…</div>
     <div class="row">
       <button class="btn" type="button" id="cashier-start-scan">Mulai Scan</button>
