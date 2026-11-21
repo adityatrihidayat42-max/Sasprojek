@@ -179,7 +179,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
   async function loadReport(from, to) {
     const area = section.querySelector('#ops-report-content');
     area.innerHTML = '<div class="ops-empty">Memuat laporan…</div>';
-    const { data, error } = await supabase.from('orders').select('id,order_number,order_type,order_status,payment_status,payment_method,subtotal,discount_total,grand_total,created_at,order_items(product_name,quantity)')
+    const { data, error } = await supabase.from('orders').select('id,order_number,customer_name,customer_phone,order_type,order_status,payment_status,payment_method,subtotal,discount_total,grand_total,created_at,order_items(product_name,quantity,unit_price,line_total)')
       .gte('created_at', new Date(from + 'T00:00:00').toISOString()).lte('created_at', new Date(to + 'T23:59:59.999').toISOString())
       .order('created_at',{ascending:false});
     if (error) { area.innerHTML = '<div class="ops-empty">Gagal memuat laporan: ' + safe(error.message) + '</div>'; return; }
@@ -191,7 +191,10 @@ export function mountAdminOperations({ supabase, profile, toast }) {
     const qris = paid.filter(x=>x.payment_method==='qris').reduce((sum,x)=>sum+Number(x.grand_total||0),0);
     const sold = {};
     reportRows.filter(o=>o.payment_status==='paid'&&o.order_status!=='cancelled').forEach(o=>(o.order_items||[]).forEach(i=>{sold[i.product_name]=(sold[i.product_name]||0)+Number(i.quantity||0)}));
-    area.innerHTML = '<div class="ops-kpi"><div>Transaksi<b>'+reportRows.length+'</b></div><div>Omzet dibayar<b>'+rupiah(revenue)+'</b></div><div>Diskon transaksi lunas<b>'+rupiah(discounts)+'</b></div><div>Tunai / QRIS<b>'+rupiah(cash)+' / '+rupiah(qris)+'</b></div></div><h3>Rincian Transaksi</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Nomor</th><th>Waktu</th><th>Jenis</th><th>Pembayaran</th><th>Diskon</th><th>Total</th><th>Status</th></tr></thead><tbody>'+reportRows.map(o=>'<tr><td>'+safe(o.order_number)+'</td><td>'+dateText(o.created_at)+'</td><td>'+safe(o.order_type)+'</td><td>'+safe((o.payment_method||'-')+' / '+o.payment_status)+'</td><td>'+rupiah(o.discount_total)+'</td><td>'+rupiah(o.grand_total)+'</td><td>'+safe(STATUS[o.order_status]||o.order_status)+'</td></tr>').join('')+'</tbody></table></div><h3 style="margin-top:18px">Menu Terjual</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Menu</th><th>Jumlah</th></tr></thead><tbody>'+Object.entries(sold).map(([name,qty])=>'<tr><td>'+safe(name)+'</td><td>'+qty+'</td></tr>').join('')+'</tbody></table></div>';
+    const unpaid = reportRows.filter(x => x.payment_status !== 'paid' && x.order_status !== 'cancelled');
+    const cancelled = reportRows.filter(x => x.order_status === 'cancelled');
+    const itemText = o => (o.order_items || []).map(i => Number(i.quantity) + '× ' + safe(i.product_name)).join('<br>') || '-';
+    area.innerHTML = `<div class="ops-kpi"><div>Transaksi lunas<b>${paid.length}</b></div><div>Belum lunas<b>${unpaid.length}</b></div><div>Dibatalkan<b>${cancelled.length}</b></div><div>Omzet dibayar<b>${rupiah(revenue)}</b></div><div>Tunai / QRIS<b>${rupiah(cash)} / ${rupiah(qris)}</b></div></div><h3>Rincian Transaksi</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Nomor</th><th>Waktu</th><th>Pelanggan</th><th>Kontak</th><th>Jenis</th><th>Item Pesanan</th><th>Pembayaran</th><th>Diskon</th><th>Total</th><th>Status</th></tr></thead><tbody>${reportRows.map(o=>'<tr><td>'+safe(o.order_number)+'</td><td>'+dateText(o.created_at)+'</td><td>'+safe(o.customer_name||'-')+'</td><td>'+safe(o.customer_phone||'-')+'</td><td>'+safe(o.order_type)+'</td><td>'+itemText(o)+'</td><td>'+safe((o.payment_method||'-')+' / '+o.payment_status)+'</td><td>'+rupiah(o.discount_total)+'</td><td>'+rupiah(o.grand_total)+'</td><td>'+safe(STATUS[o.order_status]||o.order_status)+'</td></tr>').join('')}</tbody></table></div><h3 style="margin-top:18px">Menu Terjual</h3><div class="ops-table-wrap"><table class="ops-table"><thead><tr><th>Menu</th><th>Jumlah</th></tr></thead><tbody>${Object.entries(sold).map(([name,qty])=>'<tr><td>'+safe(name)+'</td><td>'+qty+'</td></tr>').join('')||'<tr><td colspan="2">Belum ada menu terjual pada periode ini.</td></tr>'}</tbody></table></div>`;
   }
 
   section.addEventListener('click', async e => {
@@ -222,8 +225,8 @@ export function mountAdminOperations({ supabase, profile, toast }) {
         if (error) throw error;
         toast('Pesanan dibatalkan.'); await loadOrders();
       } else if (target.id === 'ops-xlsx') {
-        const summary = [['LAPORAN PENJUALAN ARANA SPACE'],['Periode', section.querySelector('[name="from"]').value, 's.d.', section.querySelector('[name="to"]').value],[],['Nomor','Waktu','Jenis','Metode','Status pembayaran','Subtotal','Diskon','Total','Status pesanan']];
-        reportRows.forEach(o=>summary.push([o.order_number,o.created_at,o.order_type,o.payment_method||'',o.payment_status,Number(o.subtotal||0),Number(o.discount_total||0),Number(o.grand_total||0),o.order_status]));
+        const summary = [['LAPORAN PENJUALAN ARANA SPACE'],['Periode', section.querySelector('[name="from"]').value, 's.d.', section.querySelector('[name="to"]').value],[],['Nomor','Waktu','Pelanggan','WhatsApp','Jenis','Item Pesanan','Metode','Status pembayaran','Subtotal','Diskon','Total','Status pesanan']];
+        reportRows.forEach(o=>summary.push([o.order_number,o.created_at,o.customer_name||'',o.customer_phone||'',o.order_type,(o.order_items||[]).map(i=>Number(i.quantity)+'x '+i.product_name).join('; '),o.payment_method||'',o.payment_status,Number(o.subtotal||0),Number(o.discount_total||0),Number(o.grand_total||0),o.order_status]));
         const paidRows = reportRows.filter(o=>o.payment_status==='paid' && o.order_status!=='cancelled');
         const sold = {};
         paidRows.forEach(o=>(o.order_items||[]).forEach(i=>{sold[i.product_name]=(sold[i.product_name]||0)+Number(i.quantity||0)}));
@@ -231,14 +234,14 @@ export function mountAdminOperations({ supabase, profile, toast }) {
         const { default: XLSX } = await import(/* @vite-ignore */ 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
         const summarySheet = XLSX.utils.aoa_to_sheet(summary);
         const menuSheet = XLSX.utils.aoa_to_sheet(menu);
-        summarySheet['!cols'] = [{wch:22},{wch:22},{wch:14},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18}];
+        summarySheet['!cols'] = [{wch:22},{wch:22},{wch:22},{wch:18},{wch:14},{wch:34},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18}];
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, summarySheet, 'Transaksi');
         XLSX.utils.book_append_sheet(workbook, menuSheet, 'Menu Terjual');
         XLSX.writeFile(workbook, 'laporan-arana-space.xlsx');
       } else if (target.id === 'ops-csv') {
-        const rows = [['Nomor','Waktu','Jenis','Metode','Status pembayaran','Subtotal','Diskon','Total','Status pesanan']];
-        reportRows.forEach(o=>rows.push([o.order_number,o.created_at,o.order_type,o.payment_method||'',o.payment_status,o.subtotal,o.discount_total,o.grand_total,o.order_status]));
+        const rows = [['Nomor','Waktu','Pelanggan','WhatsApp','Jenis','Item Pesanan','Metode','Status pembayaran','Subtotal','Diskon','Total','Status pesanan']];
+        reportRows.forEach(o=>rows.push([o.order_number,o.created_at,o.customer_name||'',o.customer_phone||'',o.order_type,(o.order_items||[]).map(i=>Number(i.quantity)+'x '+i.product_name).join('; '),o.payment_method||'',o.payment_status,o.subtotal,o.discount_total,o.grand_total,o.order_status]));
         const csv = '\uFEFF' + rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
         const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
         const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='laporan-arana-space.csv'; a.click(); URL.revokeObjectURL(url);
