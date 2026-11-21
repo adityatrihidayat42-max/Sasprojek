@@ -165,3 +165,15 @@ th{background:var(--cream2)}
 .footer-bottom-inner b{color:#c8895a}
 @media(max-width:900px){.footer-grid{grid-template-columns:1.3fr 1fr;gap:38px 44px;padding:46px 0}.footer-brand{max-width:360px}}
 @media(max-width:560px){.footer-grid{grid-template-columns:1fr 1fr;gap:32px 22px;padding:38px 0}.footer-brand{grid-column:1/-1;max-width:100%}.footer-description{max-width:340px}.footer-bottom-inner{align-items:flex-start;flex-direction:column;gap:7px}}
+
+
+/* Refined homepage feature icons */
+.features{padding:18px 16px}
+.feature{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:112px;padding:12px 14px}
+.feature .feature-icon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:3px;border:1px solid #e7d2bb;border-radius:13px;background:linear-gradient(145deg,#fffaf3,#f0dfca);color:#8b4e2d}
+.feature .feature-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.feature:first-child .feature-icon svg{fill:#c8895a;stroke:#8b4e2d}
+.feature b{font-size:.92rem;font-weight:700;color:#2a1a12}
+.feature small{font-size:.78rem;line-height:1.55;color:#806b5b}
+@media(max-width:800px){.features{padding:14px}.feature{min-height:108px;border-right:0;border-bottom:1px solid #e3d3bf}.feature:nth-last-child(-n+1){border-bottom:0}}
+@media(max-width:480px){.features{grid-template-columns:1fr 1fr}.feature{padding:12px 8px}.feature b{font-size:.84rem}.feature small{font-size:.73rem}}
