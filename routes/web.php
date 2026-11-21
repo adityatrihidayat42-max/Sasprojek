@@ -37,6 +37,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,cashier,kitchen'])->group(function () {
     Route::get('dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::middleware('role:admin,cashier')->group(function () {
+        Route::get('shifts', [Admin\ShiftController::class, 'index'])->name('shifts');
+        Route::post('shifts/open', [Admin\ShiftController::class, 'open'])->name('shifts.open');
+        Route::post('shifts/close', [Admin\ShiftController::class, 'close'])->name('shifts.close');
+    });
+
     Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders');
 
     Route::middleware('role:admin,cashier')->group(function () {
