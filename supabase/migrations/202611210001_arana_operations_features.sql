@@ -267,3 +267,45 @@ begin
     alter publication supabase_realtime add table public.orders;
   end if;
 end $$;
+
+-- Shift reports distinguish cash sales from non-cash sales.
+alter table public.cashier_shifts
+  add column if not exists cash_sales numeric(12,2) not null default 0,
+  add column if not exists non_cash_sales numeric(12,2) not null default 0;
+
+create or replace function public.close_cashier_shift(p_closing_cash numeric)
+returns jsonb language plpgsql security definer set search_path=public as $$
+declare
+  v_shift public.cashier_shifts%rowtype;
+  v_cash_sales numeric(12,2);
+  v_non_cash_sales numeric(12,2);
+  v_expected numeric(12,2);
+begin
+  if p_closing_cash is null or p_closing_cash<0 then raise exception 'Jumlah uang fisik tidak valid'; end if;
+  select * into v_shift from public.cashier_shifts
+    where cashier_id=(select auth.uid()) and status='open'
+    order by opened_at desc limit 1 for update;
+  if not found then raise exception 'Tidak ada shift aktif'; end if;
+  select
+    coalesce(sum(case when payment_method='cash' then grand_total else 0 end),0),
+    coalesce(sum(case when payment_method='qris' then grand_total else 0 end),0)
+  into v_cash_sales,v_non_cash_sales
+  from public.orders
+  where payment_status='paid' and paid_by=(select auth.uid()) and paid_at>=v_shift.opened_at;
+  v_expected:=v_shift.opening_cash+v_cash_sales;
+  update public.cashier_shifts
+    set cash_sales=v_cash_sales,non_cash_sales=v_non_cash_sales,
+        closing_cash=p_closing_cash,expected_cash=v_expected,
+        cash_difference=p_closing_cash-v_expected,status='closed',closed_at=now()
+    where id=v_shift.id returning * into v_shift;
+  return jsonb_build_object('id',v_shift.id,'opening_cash',v_shift.opening_cash,
+    'cash_sales',v_shift.cash_sales,'non_cash_sales',v_shift.non_cash_sales,
+    'closing_cash',v_shift.closing_cash,'expected_cash',v_shift.expected_cash,
+    'cash_difference',v_shift.cash_difference,'opened_at',v_shift.opened_at,
+    'closed_at',v_shift.closed_at,'status',v_shift.status);
+end $$;
+
+-- All shift writes go through validated SECURITY DEFINER RPC functions.
+revoke insert, update, delete on public.cashier_shifts from authenticated;
+drop policy if exists "cashier open own shift" on public.cashier_shifts;
+drop policy if exists "cashier close own shift" on public.cashier_shifts;
