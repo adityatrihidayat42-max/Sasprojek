@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create(['name' => 'Admin BrewNest', 'email' => 'admin@brewnest.id', 'password' => 'admin12345', 'role' => 'admin']);
-        User::create(['name' => 'Kasir', 'email' => 'kasir@brewnest.id', 'password' => 'kasir12345', 'role' => 'cashier']);
-        User::create(['name' => 'Barista', 'email' => 'barista@brewnest.id', 'password' => 'barista12345', 'role' => 'kitchen']);
+        User::create(['name' => 'Admin Arana Space', 'email' => 'admin@aranaspace.id', 'password' => 'admin12345', 'role' => 'admin']);
+        User::create(['name' => 'Kasir Arana Space', 'email' => 'kasir@aranaspace.id', 'password' => 'kasir12345', 'role' => 'cashier']);
+        User::create(['name' => 'Barista Arana Space', 'email' => 'barista@aranaspace.id', 'password' => 'barista12345', 'role' => 'kitchen']);
 
         $kopi = Category::create(['name' => 'Kopi', 'description' => 'Berbagai olahan espresso']);
         $non = Category::create(['name' => 'Non-Kopi', 'description' => 'Minuman segar dan teh']);
