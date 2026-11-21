@@ -1,23 +1,23 @@
 @extends('layouts.app')
 @section('content')
-<section class="hero">
+<section class="hero" style="background:#4b2818 url('{{ asset('images/arana-space-hero.svg') }}') center/cover no-repeat">
   <div class="container hero-grid">
     <div>
-      <div class="eyebrow">— Good Coffee, Good Mood —</div>
-      <h1 class="serif">Nikmati Kopi Terbaik di BrewNest</h1>
-      <p>Rasakan pengalaman ngopi yang lebih mudah dengan pemesanan online dan fitur modern kami.</p>
+      <div class="eyebrow">— Good Food, Good Mood —</div>
+      <h1 class="serif">Temukan Rasa, Temukan Ruang di Arana Space</h1>
+      <p>Nikmati kopi favorit, hidangan lezat, dan suasana nyaman untuk setiap cerita.</p>
       <div class="hero-actions">
         <a class="btn" href="{{ route('menu') }}">☕ Pesan Sekarang →</a>
         <a class="btn outline" href="{{ route('scan') }}">▦ Scan QR Meja</a>
       </div>
     </div>
-    <div class="hero-cup">☕</div>
+    <div class="hero-cup" aria-hidden="true">☕</div>
   </div>
 </section>
 
 <div class="container">
   <div class="features">
-    <div class="feature"><span>⚡</span><b>Pemesanan Online</b><small>Pesan lebih cepat tanpa antri</small></div>
+    <div class="feature"><span>⚡</span><b>Pemesanan Online</b><small>Pesan lebih cepat tanpa antre</small></div>
     <div class="feature"><span>📖</span><b>Menu Lengkap</b><small>Lihat menu dan harga dengan mudah</small></div>
     <div class="feature"><span>▦</span><b>Scan QR di Meja</b><small>Pesan langsung dari meja Anda</small></div>
     <div class="feature"><span>🎁</span><b>Promo Menarik</b><small>Dapatkan diskon dan promo terbaru</small></div>
@@ -29,8 +29,8 @@
   <div class="container fav">
     <div>
       <div class="eyebrow">— Our Menu</div>
-      <h2 class="serif">Menu Favorit Kami</h2>
-      <p class="muted">Nikmati berbagai pilihan kopi, makanan ringan, dan minuman segar dengan kualitas terbaik.</p>
+      <h2 class="serif">Menu Favorit Arana Space</h2>
+      <p class="muted">Pilihan kopi, makanan ringan, dan minuman segar untuk menemani harimu.</p>
       <a class="btn dark" style="margin-top:14px" href="{{ route('menu') }}">Lihat Semua Menu →</a>
     </div>
     <div class="grid">
@@ -41,11 +41,11 @@
 
 <section>
   <div class="container two">
-    <div class="promo">
+    <div class="promo" style="background:#f3dfc5 url('{{ asset('images/arana-space-promo.svg') }}') center/cover no-repeat;color:#4b2818">
       @if($promo)
         <span class="tagp">PROMO SPESIAL</span>
         <div class="big serif">{{ $promo->label() }}</div>
-        <b style="font-size:1.4rem">untuk {{ $promo->product->name ?? 'Semua Menu' }}!</b>
+        <b style="font-size:1.4rem">untuk {{ $promo->product->name ?? 'Menu Pilihan' }}!</b>
         <span>Berlaku sampai {{ $promo->ends_at->translatedFormat('d F Y') }}</span>
         <div><a class="btn" href="{{ route('promotions') }}">🎁 Lihat Promo →</a></div>
       @else
@@ -65,12 +65,12 @@
 <section id="tentang" class="about">
   <div class="container">
     <div>
-      <h2 class="serif">Tentang BrewNest</h2>
-      <p class="muted" style="margin:8px 0 14px">BrewNest adalah coffee shop modern yang menyajikan kopi berkualitas dengan suasana nyaman untuk segala aktivitas Anda.</p>
+      <h2 class="serif">Tentang Arana Space</h2>
+      <p class="muted" style="margin:8px 0 14px">Arana Space adalah ruang nyaman untuk menikmati kopi, makanan, dan waktu berkualitas bersama orang-orang terdekat.</p>
     </div>
     <div>
       <h2 class="serif">Reservasi Meja</h2>
-      <p class="muted" style="margin:8px 0 14px">Ingin reservasi tempat? Pesan meja Anda sekarang juga!</p>
+      <p class="muted" style="margin:8px 0 14px">Rencanakan kunjunganmu dan pesan meja lebih awal.</p>
       <a class="btn" href="{{ route('reservation') }}">🪑 Reservasi Sekarang →</a>
     </div>
   </div>
