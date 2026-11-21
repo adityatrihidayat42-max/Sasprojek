@@ -129,7 +129,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
       .order('created_at', { ascending: false }).limit(80);
     if (error) { orderHost.innerHTML = '<div class="ops-empty">Gagal memuat pesanan: ' + safe(error.message) + '</div>'; return; }
     ordersCache = data || [];
-    const shown = isKitchen ? ordersCache.filter(o => ['pending','confirmed','preparing'].includes(o.order_status)) : ordersCache;
+    const shown = isKitchen ? ordersCache.filter(o => ['pending','confirmed','preparing','ready'].includes(o.order_status)) : ordersCache;
     if (!shown.length) { orderHost.innerHTML = '<div class="ops-empty">Belum ada pesanan.</div>'; return; }
     orderHost.innerHTML = shown.map(o => {
       const items = (o.order_items || []).map(i => '<div class="ops-item"><span>' + Number(i.quantity) + '× ' + safe(i.product_name) + (i.note ? ' <small>('+safe(i.note)+')</small>' : '') + '</span><b>' + rupiah(i.line_total) + '</b></div>').join('');
