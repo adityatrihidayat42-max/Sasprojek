@@ -234,7 +234,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
         const { default: XLSX } = await import(/* @vite-ignore */ 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
         const summarySheet = XLSX.utils.aoa_to_sheet(summary);
         const menuSheet = XLSX.utils.aoa_to_sheet(menu);
-        summarySheet['!cols'] = [{wch:22},{wch:22},{wch:14},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18}];
+        summarySheet['!cols'] = [{wch:22},{wch:22},{wch:22},{wch:18},{wch:14},{wch:34},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18}];
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, summarySheet, 'Transaksi');
         XLSX.utils.book_append_sheet(workbook, menuSheet, 'Menu Terjual');
