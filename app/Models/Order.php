@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -43,6 +47,13 @@ class Order extends Model
     public function cafeTable()
     {
         return $this->belongsTo(CafeTable::class);
+    }
+
+    public function qrSvg(int $size = 280): string
+    {
+        $renderer = new ImageRenderer(new RendererStyle($size, 1), new SvgImageBackEnd());
+        $svg = (new Writer($renderer))->writeString(route('order.show', $this->order_number));
+        return preg_replace('/^<\?xml.*?\?>\s*/s', '', $svg);
     }
 
     public function statusLabel(): string
