@@ -11,7 +11,6 @@
         <a class="btn outline" href="{{ route('scan') }}">▦ Scan QR Meja</a>
       </div>
     </div>
-    <div class="hero-cup" aria-hidden="true">☕</div>
   </div>
 </section>
 
