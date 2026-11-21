@@ -309,3 +309,14 @@ end $$;
 revoke insert, update, delete on public.cashier_shifts from authenticated;
 drop policy if exists "cashier open own shift" on public.cashier_shifts;
 drop policy if exists "cashier close own shift" on public.cashier_shifts;
+
+-- Staff-only RPCs must not be callable by anonymous customers.
+revoke execute on function public.confirm_cash_payment(bigint) from public, anon;
+revoke execute on function public.kitchen_update_order(bigint,text) from public, anon;
+revoke execute on function public.open_cashier_shift(numeric) from public, anon;
+revoke execute on function public.close_cashier_shift(numeric) from public, anon;
+revoke execute on function public.log_order_updates() from public, anon;
+grant execute on function public.confirm_cash_payment(bigint) to authenticated;
+grant execute on function public.kitchen_update_order(bigint,text) to authenticated;
+grant execute on function public.open_cashier_shift(numeric) to authenticated;
+grant execute on function public.close_cashier_shift(numeric) to authenticated;
