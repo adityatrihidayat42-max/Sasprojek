@@ -1,5 +1,3 @@
-import * as XLSX from 'xlsx';
-
 const STATUS = {
   pending: 'Pesanan masuk',
   confirmed: 'Dikonfirmasi',
@@ -228,6 +226,7 @@ export function mountAdminOperations({ supabase, profile, toast }) {
         const sold = {};
         paidRows.forEach(o=>(o.order_items||[]).forEach(i=>{sold[i.product_name]=(sold[i.product_name]||0)+Number(i.quantity||0)}));
         const menu = [['Menu','Jumlah terjual'],...Object.entries(sold)];
+        const { default: XLSX } = await import(/* @vite-ignore */ 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
         const summarySheet = XLSX.utils.aoa_to_sheet(summary);
         const menuSheet = XLSX.utils.aoa_to_sheet(menu);
         summarySheet['!cols'] = [{wch:22},{wch:22},{wch:14},{wch:14},{wch:18},{wch:16},{wch:16},{wch:16},{wch:18}];
